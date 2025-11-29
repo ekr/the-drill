@@ -342,7 +342,7 @@ function drawMap(){ //draws all visible tiles on given map
     for (;sliceIdx < slices.length && slices[sliceIdx].index() < botNode; sliceIdx++) {
         const slice = slices[sliceIdx];
         const top = Math.max(scrollPos, slice.top());
-        const clipTop = Math.max(slice.top() - top, 0);
+        const clipTop = Math.max(top - slice.top(), 0);
         const bottom = Math.min(scrollPos + bgr.height, slice.bottom());
         const height = slice.bottom() - top;
         bgrctx.drawImage(slice.canvas(),
