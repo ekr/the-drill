@@ -348,7 +348,7 @@ function drawMap(){ //draws all visible tiles on given map
         bgrctx.drawImage(slice.canvas(),
                          0, clipTop,
                          bgr.width, height,
-                         0, top,
+                         0, top - scrollPos,
                          bgr.width, height);
     }
 
