@@ -1,3 +1,5 @@
+import { Slice } from "./buffer.js";
+
 const directions = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 const dirCoords = {
     "nw" : [-1, -1],
@@ -55,7 +57,7 @@ var nodeGap
 var scrollPos = 0 // how much scrolled
 var drillLast = 0
 var drillBitT = 0.2
-
+var slices = [];
 startGame();
 
 function populateNodes(map){ // generate the nodes on a map
@@ -321,28 +323,33 @@ function drawMap(){ //draws all visible tiles on given map
 
     const topNode = Math.max(Math.floor(scrollPos/nodeGap), 0)
     const botNode = Math.min(Math.ceil((scrollPos + bgr.height)/nodeGap) + 1, mapLength) 
+    const nodesPerSlice = 10;
+    var slices = [];
+    
+    // Temporary. Create enough slices to cover the region.
+    for (let idx = Math.floor(topNode / nodesPerSlice) * nodesPerSlice; idx < botNode;
+         idx += nodesPerSlice) {
+        slices.push(Slice(idx, bgr.width, nodesPerSlice, nodeGap, sections, slices[slices.length-1]));
+    }
 
-    for (let j = topNode; j < botNode; j++) {
-        const row = sections[j]
-        row.forEach(section => {
-            //console.log(section)
-            const path = section.path
+    // First find the top slice. Note that this can fail if
+    // we haven't populated the list properly, but that can't
+    // happen right now.
+    let sliceIdx = 0; 
+    for (;slices[sliceIdx+1].index() < topNode; sliceIdx++); 
 
-            bgrctx.beginPath();
-            bgrctx.moveTo(path[0][0] * nodeGap, path[0][1] * nodeGap - scrollPos);
-
-            bgrctx.strokeStyle = section.color;
-
-            for (let i = 1; i < path.length; i += 1) {
-                const x = path[i][0] * nodeGap;
-                const y = path[i][1] * nodeGap - scrollPos;
-                bgrctx.lineTo(x, y);
-            }
-
-            bgrctx.fillStyle = section.color;
-            bgrctx.closePath;
-            bgrctx.fill()
-        })
+    // Now copy all the slices.
+    for (;sliceIdx < slices.length && slices[sliceIdx].index() < botNode; sliceIdx++) {
+        const slice = slices[sliceIdx];
+        const top = Math.max(scrollPos, slice.top());
+        const clipTop = Math.max(slice.top() - top, 0);
+        const bottom = Math.min(scrollPos + bgr.height, slice.bottom());
+        const height = slice.bottom() - top;
+        bgrctx.drawImage(slice.canvas(),
+                         0, clipTop,
+                         bgr.width, height,
+                         0, top,
+                         bgr.width, height);
     }
 
     // runForAll((i, j) => {
