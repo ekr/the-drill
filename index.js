@@ -350,6 +350,7 @@ function drawMap(){ //draws all visible tiles on given map
                          bgr.width, height,
                          0, top - scrollPos,
                          bgr.width, height);
+        bgrctx.beginPath();
     }
 
     // runForAll((i, j) => {

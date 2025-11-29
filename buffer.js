@@ -30,7 +30,7 @@ function Slice(idx, w, nodeCt, nodeGap, sections, above) {
     const topNode = idx;
     const botNode = idx + nodeCt;
 
-    for (let j = topNode; j < botNode; j++) {
+    for (let j = topNode; j <= botNode; j++) {
         const row = sections[j]
         row.forEach(section => {
             //console.log(section)
