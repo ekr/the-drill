@@ -318,28 +318,29 @@ function genGrass(map) {
     }
 }
 
+var slices = [];
+
 function drawMap(){ //draws all visible tiles on given map
     bgrctx.clearRect(0, 0, bgr.width, bgr.height);
 
     const topNode = Math.max(Math.floor(scrollPos/nodeGap), 0)
     const botNode = Math.min(Math.ceil((scrollPos + bgr.height)/nodeGap) + 1, mapLength) 
     const nodesPerSlice = 10;
-    var slices = [];
     
-    // Temporary. Create enough slices to cover the region.
-    for (let idx = Math.floor(topNode / nodesPerSlice) * nodesPerSlice; idx < botNode;
-         idx += nodesPerSlice) {
+    // Extend the slice list
+    let idx = slices.length ? slices[slices.length-1].index() + nodesPerSlice : 0;
+    while (idx < botNode) {
         slices.push(Slice(idx, bgr.width, nodesPerSlice, nodeGap, sections, slices[slices.length-1]));
+        idx += nodesPerSlice;
     }
 
-    // First find the top slice. Note that this can fail if
-    // we haven't populated the list properly, but that can't
-    // happen right now.
-    let sliceIdx = 0; 
-    for (;slices[sliceIdx+1].index() < topNode; sliceIdx++); 
+    // Now prune off any slices from the front that we don't need.
+    while (slices.length && (slices[0].index() + nodesPerSlice) < topNode) {
+        slices.shift();
+    }
 
     // Now copy all the slices.
-    for (;sliceIdx < slices.length && slices[sliceIdx].index() < botNode; sliceIdx++) {
+    for (let sliceIdx = 0; sliceIdx < slices.length; sliceIdx++) {
         const slice = slices[sliceIdx];
         const top = Math.max(scrollPos, slice.top());
         const clipTop = Math.max(top - slice.top(), 0);
